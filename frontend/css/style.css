@@ -83,14 +83,59 @@ body {
     justify-content: space-between;
 }
 
+/* Área das mensagens */
 .chat__messages {
-    flex-grow: 1;
-    padding: 30px 30px 90px;
+    flex: 1 1 auto;
+    padding: 30px 20px 120px; /* espaço inferior para o input fixo */
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    gap: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: flex-start;
 }
 
+/* Bolhas de mensagem */
+.chat__messages > div {
+    display: inline-block;
+    padding: 10px 14px;
+    max-width: 70%;          /* largura máxima responsiva */
+    width: auto;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.35;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.12);
+}
+
+/* Mensagem do próprio usuário */
+.message--self {
+    background-color: #f2f2f2;
+    color: #121212;
+    border-radius: 10px 10px 0 10px;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+/* Mensagem de outro usuário */
+.message--other {
+    background-color: #333;
+    color: #f2f2f2;
+    border-radius: 0 10px 10px 10px;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message--sender {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: cadetblue;
+}
+
+/* Formulário fixo no rodapé */
 .chat__form {
     background-color: #191919;
     padding: 15px 20px;
@@ -101,6 +146,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
+    z-index: 999;
 }
 
 .chat__input {
@@ -123,35 +169,4 @@ body {
 
 .chat__button > span {
     font-size: 1.8rem;
-}
-
-.chat__messages > div {
-    padding: 10px;
-    width: 100%;
-    max-width: 250px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 15px;
-    line-height: 22px;
-}
-
-.message--self {
-    background-color: #f2f2f2;
-    color: #121212;
-    border-radius: 10px 10px 0 10px;
-    align-self: flex-end;
-}
-
-.message--other {
-    background-color: #333;
-    color: #f2f2f2;
-    border-radius: 0 10px 10px 10px;
-    align-self: flex-start;
-}
-
-.message--sender {
-    display: block;
-    margin-bottom: 15px;
-    font-weight: 700;
-    color: cadetblue;
 }
