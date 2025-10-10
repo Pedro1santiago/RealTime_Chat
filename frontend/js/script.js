@@ -11,7 +11,7 @@ const chatMessages = chat.querySelector(".chat__messages");
 
 const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "hotpink", "gold"];
 const user = { id: "", name: "", color: "", lang: "" };
-let socket;
+let websocket = null;
 
 // Cria mensagens
 const createMessageSelfElement = content => {
@@ -33,7 +33,8 @@ const createMessageOtherElement = (content, sender, senderColor) => {
   return div;
 };
 
-const scrollScreen = () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
+const scrollScreen = () => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
 
 // Alterna telas
 function showScreen(screen) {
@@ -46,16 +47,26 @@ function showScreen(screen) {
   if (screen === "chat") chat.style.display = "flex";
 }
 
-// Inicia na tela de idioma
+// Inicializa na tela de idioma
 showScreen("idioma");
 history.replaceState({ screen: "idioma" }, "");
+
+// Processa mensagem recebida
+const processMessage = event => {
+  const { userId, userName, userColor, content } = JSON.parse(event.data);
+  const message = userId === user.id
+    ? createMessageSelfElement(content)
+    : createMessageOtherElement(content, userName, userColor);
+  chatMessages.appendChild(message);
+  scrollScreen();
+};
 
 // LOGIN
 const handleLogin = event => {
   event.preventDefault();
   user.id = crypto.randomUUID();
   user.name = loginInput.value;
-  user.color = colors[Math.floor(Math.random() * colors.length)];
+  user.color = getRandomColor();
   user.lang = document.getElementById("idiomas_select").value;
 
   if (!user.name || !user.lang) {
@@ -66,26 +77,20 @@ const handleLogin = event => {
   showScreen("chat");
   history.pushState({ screen: "chat" }, "");
 
-  socket = io();  // se conecta automaticamente ao mesmo host
-
-
-  socket.on("connect", () => {
-    socket.emit("register_user", {
-      id: user.id,
-      name: user.name,
-      color: user.color,
-      lang: user.lang
-    });
-  });
-
-  socket.on("chat_message", data => {
-    const message = data.userId === user.id
-      ? createMessageSelfElement(data.content)
-      : createMessageOtherElement(data.content, data.userName, data.userColor);
-
-    chatMessages.appendChild(message);
-    scrollScreen();
-  });
+  // Conecta ao WebSocket se ainda não conectado
+  if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+    websocket = new WebSocket("wss://chat-tech.onrender.com");
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({
+        type: "register_user",
+        id: user.id,
+        name: user.name,
+        color: user.color,
+        lang: user.lang
+      }));
+    };
+    websocket.onmessage = processMessage;
+  }
 };
 
 // Envia mensagem
@@ -100,7 +105,7 @@ const sendMessage = event => {
     content: chatInput.value
   };
 
-  socket.emit("message", message);
+  websocket.send(JSON.stringify(message));
   chatInput.value = "";
 };
 
@@ -133,4 +138,9 @@ select.addEventListener("change", () => {
   }
   showScreen("login");
   history.pushState({ screen: "login" }, "");
+});
+
+// Voltar/Avançar navegador
+window.addEventListener("popstate", event => {
+  if (event.state && event.state.screen) showScreen(event.state.screen);
 });
