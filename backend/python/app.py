@@ -1,78 +1,102 @@
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO
-from googletrans import Translator
+from flask import Flask, render_template
+from flask_sockets import Sockets
+from deep_translator import GoogleTranslator
 import os
+import json
 
-# Caminho absoluto da pasta atual (onde este app.py está)
+# Caminho absoluto da pasta atual
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../frontend"))
 
-# Caminho para a pasta frontend (2 níveis acima)
-STATIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../frontend"))
+app = Flask(
+    __name__,
+    static_folder=FRONTEND_DIR,                # arquivos CSS/JS
+    template_folder=os.path.join(FRONTEND_DIR, "templates")  # templates
+)
 
-# Cria o app Flask apontando para o frontend como static e templates na pasta python/templates
-app = Flask(__name__,
-            static_folder=STATIC_DIR,
-            template_folder=os.path.join(BASE_DIR, "templates"))
 
-socketio = SocketIO(app, cors_allowed_origins="*")
-translator = Translator()
+sockets = Sockets(app)
 
-users = {}
+# Armazena os websockets ativos e info dos usuários
+clients = {}
 
 @app.route('/')
 def home():
-    # renderiza o index.html que está em backend/python/templates/
+    print("Rota / requisitada")
     return render_template('index.html')
 
+@sockets.route('/ws')
+def websocket_handler(ws):
+    user_id = None
+    try:
+        print("Novo cliente conectado ao WebSocket")
+        while not ws.closed:
+            message = ws.receive()
+            if not message:
+                print("Mensagem vazia recebida, ignorando...")
+                continue
 
-@socketio.on('connect')
-def handle_connect():
-    print("Novo cliente conectado!")
+            print(f"Mensagem recebida do cliente: {message}")
 
+            try:
+                data = json.loads(message)
+            except Exception as e:
+                print("Erro ao converter JSON:", e)
+                continue
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    disconnected = [uid for uid, info in users.items() if info['sid'] == request.sid]
-    for uid in disconnected:
-        print(f"Usuário desconectado: {users[uid]['name']}")
-        del users[uid]
+            # Registro de usuário
+            if 'id' in data and 'name' in data:
+                user_id = data['id']
+                clients[user_id] = {
+                    'ws': ws,
+                    'name': data['name'],
+                    'color': data.get('color', 'black'),
+                    'lang': data.get('lang', 'pt')
+                }
+                print(f"[INFO] Usuário conectado: {clients[user_id]}")
+            else:
+                # Broadcast com tradução
+                sender_id = data.get('userId')
+                sender_name = data.get('userName')
+                sender_color = data.get('userColor', 'black')
+                original_text = data.get('content', '')
 
+                print(f"[CHAT] Mensagem de {sender_name} ({sender_id}): {original_text}")
 
-@socketio.on('register_user')
-def register_user(data):
-    user_id = data['id']
-    users[user_id] = {
-        'name': data['name'],
-        'color': data['color'],
-        'lang': data['lang'],
-        'sid': request.sid
-    }
-    print(f"Usuário registrado: {users[user_id]}")
+                for uid, info in clients.items():
+                    try:
+                        target_lang = info.get('lang', 'pt')
+                        print(f"Traduzindo para {target_lang} para o usuário {info.get('name')}")
+                        translated_text = GoogleTranslator(source='auto', target=target_lang).translate(original_text)
+                        print(f"Texto traduzido: {translated_text}")
 
+                        payload = {
+                            'userId': sender_id,
+                            'userName': sender_name,
+                            'userColor': sender_color,
+                            'content': translated_text
+                        }
 
-@socketio.on('message')
-def handle_message(data):
-    sender_id = data['userId']
-    sender_name = data['userName']
-    sender_color = data['userColor']
-    original_text = data['content']
+                        info['ws'].send(json.dumps(payload))
+                        print(f"Mensagem enviada para {info.get('name')}")
+                    except Exception as e:
+                        print(f"[ERRO] Erro na tradução ou envio para {info.get('name')}: {e}")
 
-    print(f"Mensagem recebida de {sender_name}: {original_text}")
+    except Exception as e:
+        print(f"[ERRO] Erro geral no WebSocket: {e}")
+    finally:
+        if user_id and user_id in clients:
+            print(f"[INFO] Usuário desconectado: {clients[user_id]['name']}")
+            del clients[user_id]
 
-    for uid, info in users.items():
-        try:
-            target_lang = info['lang']
-            translated_text = translator.translate(original_text, dest=target_lang).text
+if __name__ == "__main__":
+    from gevent import pywsgi
+    from geventwebsocket.handler import WebSocketHandler
 
-            socketio.emit('chat_message', {
-                'userId': sender_id,
-                'userName': sender_name,
-                'userColor': sender_color,
-                'content': translated_text
-            }, room=info['sid'])
-        except Exception as e:
-            print("Erro na tradução:", e)
-
-
-if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    server = pywsgi.WSGIServer(
+        ("0.0.0.0", 5000),
+        app,
+        handler_class=WebSocketHandler
+    )
+    print("Servidor rodando em http://0.0.0.0:5000")
+    server.serve_forever()
