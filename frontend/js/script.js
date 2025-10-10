@@ -11,7 +11,7 @@ const chatMessages = chat.querySelector(".chat__messages");
 
 const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "hotpink", "gold"];
 const user = { id: "", name: "", color: "", lang: "" };
-let websocket = null;
+let websocket = null; // WebSocket
 
 // Cria mensagens
 const createMessageSelfElement = content => {
@@ -33,7 +33,6 @@ const createMessageOtherElement = (content, sender, senderColor) => {
   return div;
 };
 
-const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 const scrollScreen = () => chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
 
 // Alterna telas
@@ -47,16 +46,17 @@ function showScreen(screen) {
   if (screen === "chat") chat.style.display = "flex";
 }
 
-// Inicializa na tela de idioma
+// Inicializa tela de idioma
 showScreen("idioma");
 history.replaceState({ screen: "idioma" }, "");
 
-// Processa mensagem recebida
+// Processa mensagens recebidas do WebSocket
 const processMessage = event => {
-  const { userId, userName, userColor, content } = JSON.parse(event.data);
-  const message = userId === user.id
-    ? createMessageSelfElement(content)
-    : createMessageOtherElement(content, userName, userColor);
+  const data = JSON.parse(event.data);
+  const message = data.userId === user.id
+    ? createMessageSelfElement(data.content)
+    : createMessageOtherElement(data.content, data.userName, data.userColor);
+
   chatMessages.appendChild(message);
   scrollScreen();
 };
@@ -66,7 +66,7 @@ const handleLogin = event => {
   event.preventDefault();
   user.id = crypto.randomUUID();
   user.name = loginInput.value;
-  user.color = getRandomColor();
+  user.color = colors[Math.floor(Math.random() * colors.length)];
   user.lang = document.getElementById("idiomas_select").value;
 
   if (!user.name || !user.lang) {
@@ -77,10 +77,12 @@ const handleLogin = event => {
   showScreen("chat");
   history.pushState({ screen: "chat" }, "");
 
-  // Conecta ao WebSocket se ainda não conectado
+  // Conecta ao WebSocket se ainda não estiver conectado
   if (!websocket || websocket.readyState !== WebSocket.OPEN) {
     websocket = new WebSocket("wss://chat-tech.onrender.com");
+    websocket.onmessage = processMessage;
     websocket.onopen = () => {
+      // Envia registro do usuário ao servidor
       websocket.send(JSON.stringify({
         type: "register_user",
         id: user.id,
@@ -89,7 +91,6 @@ const handleLogin = event => {
         lang: user.lang
       }));
     };
-    websocket.onmessage = processMessage;
   }
 };
 
@@ -99,6 +100,7 @@ const sendMessage = event => {
   if (!chatInput.value.trim()) return;
 
   const message = {
+    type: "chat_message",
     userId: user.id,
     userName: user.name,
     userColor: user.color,
@@ -113,7 +115,6 @@ const sendMessage = event => {
 loginForm.addEventListener("submit", handleLogin);
 chatForm.addEventListener("submit", sendMessage);
 
-// Voltar botão
 backButton.addEventListener("click", () => {
   showScreen("idioma");
   history.pushState({ screen: "idioma" }, "");
@@ -138,9 +139,4 @@ select.addEventListener("change", () => {
   }
   showScreen("login");
   history.pushState({ screen: "login" }, "");
-});
-
-// Voltar/Avançar navegador
-window.addEventListener("popstate", event => {
-  if (event.state && event.state.screen) showScreen(event.state.screen);
 });
