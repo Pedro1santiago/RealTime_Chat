@@ -18,7 +18,7 @@
     <section class="seletor_idiomas" id="seletor_idiomas">
       <h2>Idioma de preferência</h2>
       <form class="seletor__form">
-        <select name="idiomas_id" id="idiomas_select" class="seletor__input" data-live-search="true">
+        <select name="idiomas_id" id="idiomas_select" class="seletor__input" data-live-search="true" required>
           <option value="" disabled selected hidden>Selecione um idioma</option>
           <option value="pt">Português</option>
           <option value="en">Inglês</option>
@@ -28,9 +28,11 @@
     </section>
 
     <section class="login">
+      <h1 class="titulo">Tradução automática em tempo real 🌍</h1>
       <h2>Login</h2>
       <form class="login__form">
         <input type="text" class="login__input" placeholder="Seu nome" required />
+        <input type="password" class="login__input" placeholder="Senha" required>
         <button type="submit" class="login__button">Entrar</button>
       </form>
     </section>

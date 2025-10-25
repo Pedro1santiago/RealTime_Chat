@@ -232,3 +232,10 @@ body {
 .seletor_idiomas.dropdown-open {
     height: 220px;
 }
+.titulo {
+  text-align: center;
+  color: white;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
