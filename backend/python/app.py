@@ -1,3 +1,4 @@
+#Teste
 from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO
 from googletrans import Translator
