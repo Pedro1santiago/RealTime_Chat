@@ -9,6 +9,11 @@ const chatForm = chat.querySelector(".chat__form");
 const chatInput = chat.querySelector(".chat__input");
 const chatMessages = chat.querySelector(".chat__messages");
 
+const endButton = document.querySelector(".end-button");
+const encerramento = document.querySelector(".encerramento");
+const restartButton = document.querySelector(".restart-button");
+
+
 const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "hotpink", "gold"];
 const user = { id: "", name: "", color: "", lang: "" };
 let socket;
@@ -40,11 +45,20 @@ function showScreen(screen) {
   login.style.display = "none";
   chat.style.display = "none";
   formSelector.style.display = "none";
+  encerramento.style.display = "none";
+
+  // Esconde o botão "Encerrar" por padrão
+  endButton.style.display = "none";
 
   if (screen === "login") login.style.display = "flex";
   if (screen === "idioma") formSelector.style.display = "flex";
-  if (screen === "chat") chat.style.display = "flex";
+  if (screen === "chat") {
+    chat.style.display = "flex";
+    endButton.style.display = "block"; // mostra o botão apenas no chat
+  }
+  if (screen === "encerramento") encerramento.style.display = "flex";
 }
+
 
 // Inicia na tela de idioma
 showScreen("idioma");
@@ -113,6 +127,24 @@ backButton.addEventListener("click", () => {
   showScreen("idioma");
   history.pushState({ screen: "idioma" }, "");
 });
+
+endButton.addEventListener("click", () => {
+  // Desconecta o socket, se estiver ativo
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  // Mostra a tela de encerramento
+  showScreen("encerramento");
+  history.pushState({ screen: "encerramento" }, "");
+});
+
+restartButton.addEventListener("click", () => {
+  showScreen("idioma");
+  history.pushState({ screen: "idioma" }, "");
+});
+
 
 // Troca idioma de interface
 const select = document.getElementById("idiomas_select");

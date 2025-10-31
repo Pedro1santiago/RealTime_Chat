@@ -14,6 +14,7 @@
 <body>
   <section class="container">
     <button class="back-button">Voltar</button>
+    <button class="end-button">Encerrar chat</button>
 
     <section class="seletor_idiomas" id="seletor_idiomas">
       <h2>Idioma de preferência</h2>
@@ -28,7 +29,7 @@
     </section>
 
     <section class="login">
-      <h1 class="titulo">Tradução automática em tempo real 🌍</h1>
+      <h1 class="titulo">Tradução automática em tempo real</h1>
       <h2>Login</h2>
       <form class="login__form">
         <input type="text" class="login__input" placeholder="Seu nome" required />
@@ -46,7 +47,14 @@
         </button>
       </form>
     </section>
+
+    <section class="encerramento">
+      <h2>Sessão encerrada</h2>
+      <p>Obrigado por utilizar o chat!</p>
+      <button class="restart-button">Voltar ao início</button>
+    </section>
   </section>
+
 
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="js/script.js"></script>
