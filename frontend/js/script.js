@@ -149,14 +149,53 @@ restartButton.addEventListener("click", () => {
 // Troca idioma de interface
 const select = document.getElementById("idiomas_select");
 const textos = {
-  pt: { loginTitulo: "Login", loginBotao: "Entrar", voltar: "Voltar", loginPlaceholder: "Seu nome", chatPlaceholder: "Digite uma mensagem" },
-  en: { loginTitulo: "Login", loginBotao: "Enter", voltar: "Back", loginPlaceholder: "Your name", chatPlaceholder: "Type a message" },
-  es: { loginTitulo: "Inicio de sesión", loginBotao: "Entrar", voltar: "Volver", loginPlaceholder: "Tu nombre", chatPlaceholder: "Escribe un mensaje" }
+  pt: {
+    traducaoTitulo: "Tradução automática em tempo real",
+    loginTitulo: "Login",
+    loginBotao: "Entrar",
+    voltar: "Voltar",
+    loginPlaceholder: "Seu nome",
+    chatPlaceholder: "Digite uma mensagem",
+    encerrar: "Encerrar chat",
+    encerradoTitulo: "Sessão encerrada",
+    encerradoMensagem: "Obrigado por utilizar o chat!",
+    voltarInicio: "Voltar ao início"
+  },
+  en: {
+    traducaoTitulo: "Real-time automatic translation",
+    loginTitulo: "Login",
+    loginBotao: "Enter",
+    voltar: "Back",
+    loginPlaceholder: "Your name",
+    chatPlaceholder: "Type a message",
+    encerrar: "End chat",
+    encerradoTitulo: "Session ended",
+    encerradoMensagem: "Thank you for using the chat!",
+    voltarInicio: "Back to start"
+  },
+  es: {
+    traducaoTitulo: "Traducción automática en tiempo real",
+    loginTitulo: "Inicio de sesión",
+    loginBotao: "Entrar",
+    voltar: "Volver",
+    loginPlaceholder: "Tu nombre",
+    chatPlaceholder: "Escribe un mensaje",
+    encerrar: "Finalizar chat",
+    encerradoTitulo: "Sesión finalizada",
+    encerradoMensagem: "¡Gracias por usar el chat!",
+    voltarInicio: "Volver al inicio"
+  }
 };
+
 
 select.addEventListener("change", () => {
   const idioma = select.value;
   if (textos[idioma]) {
+    endButton.textContent = textos[idioma].encerrar;
+    document.querySelector(".encerramento h2").textContent = textos[idioma].encerradoTitulo;
+    document.querySelector(".encerramento p").textContent = textos[idioma].encerradoMensagem;
+    document.querySelector(".restart-button").textContent = textos[idioma].voltarInicio;
+    document.getElementById("titulo_traducao").textContent = textos[idioma].traducaoTitulo;
     login.querySelector("h2").textContent = textos[idioma].loginTitulo;
     login.querySelector(".login__button").textContent = textos[idioma].loginBotao;
     login.querySelector(".login__input").placeholder = textos[idioma].loginPlaceholder;
