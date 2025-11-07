@@ -79,6 +79,37 @@ def handle_message(data):
         except Exception as e:
             print("Erro na tradução:", e)
 
+@app.route('/grafico')
+def gerar_grafico():
+    import io
+    import base64
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # --- Gráfico fictício ---
+    x = np.linspace(0, 10, 100)
+    y = np.sin(x) + np.random.rand(100) * 0.2
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(x, y, label='Exemplo de gráfico', color='blue')
+    plt.title('Gráfico de Latência média da tradução em tempo real')
+    plt.xlabel('Tempo')
+    plt.ylabel('Valor')
+    plt.legend()
+    plt.tight_layout()
+
+    # Converter para base64
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+
+    return f"data:image/png;base64,{img_base64}"
+
+
+
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

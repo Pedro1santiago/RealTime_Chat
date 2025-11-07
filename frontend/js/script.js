@@ -128,7 +128,7 @@ backButton.addEventListener("click", () => {
   history.pushState({ screen: "idioma" }, "");
 });
 
-endButton.addEventListener("click", () => {
+/*endButton.addEventListener("click", () => {
   // Desconecta o socket, se estiver ativo
   if (socket) {
     socket.disconnect();
@@ -138,6 +138,42 @@ endButton.addEventListener("click", () => {
   // Mostra a tela de encerramento
   showScreen("encerramento");
   history.pushState({ screen: "encerramento" }, "");
+});*/
+// ✅ Botão Encerrar Chat (com exibição de gráfico)
+endButton.addEventListener("click", async () => {
+  // Desconecta o socket, se estiver ativo
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  // Busca o gráfico gerado no back-end Flask
+  try {
+    const resp = await fetch('/grafico');
+    const imgSrc = await resp.text();
+
+    // Mostra a tela de encerramento
+    showScreen("encerramento");
+    history.pushState({ screen: "encerramento" }, "");
+
+    // Exibe o gráfico no HTML
+    const encerramentoDiv = document.querySelector(".encerramento");
+    let img = encerramentoDiv.querySelector("img");
+    if (!img) {
+      img = document.createElement("img");
+      encerramentoDiv.appendChild(img);
+    }
+    img.src = imgSrc;
+    img.style.width = "1000px";
+    img.style.maxWidth = "95%";
+    img.style.marginTop = "30px";
+    img.style.borderRadius = "12px";
+    img.style.boxShadow = "0 0 15px rgba(0,0,0,0.25)";
+;
+  } catch (error) {
+    console.error("Erro ao gerar gráfico:", error);
+    showScreen("encerramento");
+  }
 });
 
 restartButton.addEventListener("click", () => {
@@ -149,53 +185,14 @@ restartButton.addEventListener("click", () => {
 // Troca idioma de interface
 const select = document.getElementById("idiomas_select");
 const textos = {
-  pt: {
-    traducaoTitulo: "Tradução automática em tempo real",
-    loginTitulo: "Login",
-    loginBotao: "Entrar",
-    voltar: "Voltar",
-    loginPlaceholder: "Seu nome",
-    chatPlaceholder: "Digite uma mensagem",
-    encerrar: "Encerrar chat",
-    encerradoTitulo: "Sessão encerrada",
-    encerradoMensagem: "Obrigado por utilizar o chat!",
-    voltarInicio: "Voltar ao início"
-  },
-  en: {
-    traducaoTitulo: "Real-time automatic translation",
-    loginTitulo: "Login",
-    loginBotao: "Enter",
-    voltar: "Back",
-    loginPlaceholder: "Your name",
-    chatPlaceholder: "Type a message",
-    encerrar: "End chat",
-    encerradoTitulo: "Session ended",
-    encerradoMensagem: "Thank you for using the chat!",
-    voltarInicio: "Back to start"
-  },
-  es: {
-    traducaoTitulo: "Traducción automática en tiempo real",
-    loginTitulo: "Inicio de sesión",
-    loginBotao: "Entrar",
-    voltar: "Volver",
-    loginPlaceholder: "Tu nombre",
-    chatPlaceholder: "Escribe un mensaje",
-    encerrar: "Finalizar chat",
-    encerradoTitulo: "Sesión finalizada",
-    encerradoMensagem: "¡Gracias por usar el chat!",
-    voltarInicio: "Volver al inicio"
-  }
+  pt: { loginTitulo: "Login", loginBotao: "Entrar", voltar: "Voltar", loginPlaceholder: "Seu nome", chatPlaceholder: "Digite uma mensagem" },
+  en: { loginTitulo: "Login", loginBotao: "Enter", voltar: "Back", loginPlaceholder: "Your name", chatPlaceholder: "Type a message" },
+  es: { loginTitulo: "Inicio de sesión", loginBotao: "Entrar", voltar: "Volver", loginPlaceholder: "Tu nombre", chatPlaceholder: "Escribe un mensaje" }
 };
-
 
 select.addEventListener("change", () => {
   const idioma = select.value;
   if (textos[idioma]) {
-    endButton.textContent = textos[idioma].encerrar;
-    document.querySelector(".encerramento h2").textContent = textos[idioma].encerradoTitulo;
-    document.querySelector(".encerramento p").textContent = textos[idioma].encerradoMensagem;
-    document.querySelector(".restart-button").textContent = textos[idioma].voltarInicio;
-    document.getElementById("titulo_traducao").textContent = textos[idioma].traducaoTitulo;
     login.querySelector("h2").textContent = textos[idioma].loginTitulo;
     login.querySelector(".login__button").textContent = textos[idioma].loginBotao;
     login.querySelector(".login__input").placeholder = textos[idioma].loginPlaceholder;

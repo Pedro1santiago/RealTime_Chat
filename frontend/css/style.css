@@ -288,3 +288,8 @@ body {
 .restart-button:hover {
   background-color: #fff;
 }
+
+.encerramento img {
+  display: block;
+  margin: 20px auto;
+}
