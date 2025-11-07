@@ -140,7 +140,7 @@ backButton.addEventListener("click", () => {
   history.pushState({ screen: "encerramento" }, "");
 });*/
 // ✅ Botão Encerrar Chat (com exibição de gráfico)
-endButton.addEventListener("click", async () => {
+/*endButton.addEventListener("click", async () => {
   // Desconecta o socket, se estiver ativo
   if (socket) {
     socket.disconnect();
@@ -174,7 +174,41 @@ endButton.addEventListener("click", async () => {
     console.error("Erro ao gerar gráfico:", error);
     showScreen("encerramento");
   }
+});*/
+
+endButton.addEventListener("click", async () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  showScreen("encerramento");
+  history.pushState({ screen: "encerramento" }, "");
+
+  const encerramentoDiv = document.querySelector(".encerramento");
+
+  const rotas = ['/grafico', '/grafico1', '/grafico2', '/grafico3', '/grafico4'];
+
+  for (const rota of rotas) {
+    try {
+      const resp = await fetch(rota);
+      const imgSrc = await resp.text();
+
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      img.style.width = "1000px";
+      img.style.maxWidth = "95%";
+      img.style.marginTop = "30px";
+      img.style.borderRadius = "12px";
+      img.style.boxShadow = "0 0 15px rgba(0,0,0,0.25)";
+      encerramentoDiv.appendChild(img);
+    } catch (error) {
+      console.error(`Erro ao gerar ${rota}:`, error);
+    }
+  }
 });
+
+
 
 restartButton.addEventListener("click", () => {
   showScreen("idioma");

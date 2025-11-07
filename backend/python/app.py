@@ -107,6 +107,92 @@ def gerar_grafico():
 
     return f"data:image/png;base64,{img_base64}"
 
+@app.route('/grafico1')
+def grafico1():
+    import io, base64, numpy as np, matplotlib.pyplot as plt
+    x = np.linspace(0, 10, 100)
+    y = np.cos(x) + np.random.rand(100) * 0.3
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(x, y, color='orange', label='Uso de CPU')
+    plt.title('Gráfico de Uso de CPU (%)')
+    plt.xlabel('Tempo')
+    plt.ylabel('CPU (%)')
+    plt.legend()
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return f"data:image/png;base64,{img}"
+
+
+@app.route('/grafico2')
+def grafico2():
+    import io, base64, numpy as np, matplotlib.pyplot as plt
+    x = np.linspace(0, 10, 100)
+    y = np.exp(-x/3) + np.random.rand(100) * 0.1
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(x, y, color='green', label='Conexões ativas')
+    plt.title('Gráfico de Conexões Ativas')
+    plt.xlabel('Tempo')
+    plt.ylabel('Conexões')
+    plt.legend()
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return f"data:image/png;base64,{img}"
+
+
+@app.route('/grafico3')
+def grafico3():
+    import io, base64, numpy as np, matplotlib.pyplot as plt
+    categorias = ['PT', 'EN', 'ES', 'FR']
+    valores = [np.random.randint(10, 100) for _ in categorias]
+
+    plt.figure(figsize=(8, 5))
+    plt.bar(categorias, valores, color=['#4CAF50', '#2196F3', '#FFC107', '#9C27B0'])
+    plt.title('Distribuição de Idiomas no Chat')
+    plt.ylabel('Quantidade de Mensagens')
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return f"data:image/png;base64,{img}"
+
+
+@app.route('/grafico4')
+def grafico4():
+    import io, base64, numpy as np, matplotlib.pyplot as plt
+    x = np.linspace(0, 10, 50)
+    y1 = np.sin(x)
+    y2 = np.sin(x + 1)
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(x, y1, label='Tradução EN', color='blue')
+    plt.plot(x, y2, label='Tradução ES', color='red')
+    plt.title('Comparativo de Tempo de Tradução')
+    plt.xlabel('Tempo (s)')
+    plt.ylabel('Latência')
+    plt.legend()
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    img = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return f"data:image/png;base64,{img}"
 
 
 
