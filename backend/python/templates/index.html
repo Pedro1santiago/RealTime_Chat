@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
+  <link rel="stylesheet" href="css/style.css">
+
+  <title>Chat | project TECH</title>
+</head>
+
+<body>
+  <section class="container">
+    <button class="back-button">Voltar</button>
+    <button class="end-button">Encerrar chat</button>
+
+    <section class="seletor_idiomas" id="seletor_idiomas">
+      <h2>Idioma de preferência</h2>
+      <form class="seletor__form">
+        <select name="idiomas_id" id="idiomas_select" class="seletor__input" data-live-search="true" required>
+          <option value="" disabled selected hidden>Selecione um idioma</option>
+          <option value="pt">Português</option>
+          <option value="en">Inglês</option>
+          <option value="es">Espanhol</option>
+        </select>
+      </form>
+    </section>
+
+    <section class="login">
+      <h1 id="titulo_traducao" class="titulo">Tradução automática em tempo real </h1>
+      <h2>Login</h2>
+      <form class="login__form">
+        <input type="text" class="login__input" placeholder="Seu nome" required />
+        <input type="password" class="login__input" placeholder="Senha" required>
+        <button type="submit" class="login__button">Entrar</button>
+      </form>
+    </section>
+
+    <section class="chat">
+      <section class="chat__messages"></section>
+      <form class="chat__form">
+        <input type="text" class="chat__input" placeholder="Digite uma mensagem" required />
+        <button type="submit" class="chat__button">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </form>
+    </section>
+
+    <section class="encerramento">
+      <h2>Sessão encerrada</h2>
+      <p>Obrigado por utilizar o chat!</p>
+      <button class="restart-button">Voltar ao início</button>
+    </section>
+  </section>
+
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
