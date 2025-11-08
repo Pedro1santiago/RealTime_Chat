@@ -1,24 +1,50 @@
+// =============================
+// ELEMENTOS DOM
+// =============================
 const login = document.querySelector(".login");
 const loginForm = login.querySelector(".login__form");
-const loginInput = login.querySelector(".login__input");
+const loginInputs = login.querySelectorAll(".login__input");
 const backButton = document.querySelector(".back-button");
-const formSelector = document.getElementById("seletor_idiomas");
 
 const chat = document.querySelector(".chat");
 const chatForm = chat.querySelector(".chat__form");
-const chatInput = chat.querySelector(".chat__input");
+const chatInput = document.querySelector(".chat__input");
 const chatMessages = chat.querySelector(".chat__messages");
 
 const endButton = document.querySelector(".end-button");
 const encerramento = document.querySelector(".encerramento");
 const restartButton = document.querySelector(".restart-button");
 
+const graficosSection = document.querySelector(".graficos");
+const cards = document.querySelectorAll(".grafico-card");
+const display = document.querySelector(".grafico"); // primeiro gráfico como display principal
+
+const seletorIdiomasSection = document.querySelector(".seletor_idiomas");
+const seletorIdiomas = document.getElementById("idiomas_select");
+const tituloTraducao = document.getElementById("titulo_traducao");
 
 const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "hotpink", "gold"];
 const user = { id: "", name: "", color: "", lang: "" };
 let socket;
 
-// Cria mensagens
+// =============================
+// TEXTOS
+// =============================
+const traducoesTitulo = {
+  pt: "Tradução automática em tempo real",
+  en: "Real-time automatic translation",
+  es: "Traducción automática en tiempo real"
+};
+
+const textos = {
+  pt: { loginTitulo: "Login", loginBotao: "Entrar", voltar: "Voltar", loginPlaceholder: "Seu nome", chatPlaceholder: "Digite uma mensagem" },
+  en: { loginTitulo: "Login", loginBotao: "Enter", voltar: "Back", loginPlaceholder: "Your name", chatPlaceholder: "Type a message" },
+  es: { loginTitulo: "Inicio de sesión", loginBotao: "Entrar", voltar: "Volver", loginPlaceholder: "Tu nombre", chatPlaceholder: "Escribe un mensaje" }
+};
+
+// =============================
+// FUNÇÕES AUX
+// =============================
 const createMessageSelfElement = content => {
   const div = document.createElement("div");
   div.classList.add("message--self");
@@ -40,199 +66,148 @@ const createMessageOtherElement = (content, sender, senderColor) => {
 
 const scrollScreen = () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 
-// Alterna telas
+// =============================
+// CONTROLE DE TELAS
+// =============================
 function showScreen(screen) {
   login.style.display = "none";
   chat.style.display = "none";
-  formSelector.style.display = "none";
+  seletorIdiomasSection.style.display = "none";
   encerramento.style.display = "none";
-
-  // Esconde o botão "Encerrar" por padrão
+  graficosSection.style.display = "none";
   endButton.style.display = "none";
 
+  if (screen === "idioma") seletorIdiomasSection.style.display = "flex";
   if (screen === "login") login.style.display = "flex";
-  if (screen === "idioma") formSelector.style.display = "flex";
-  if (screen === "chat") {
-    chat.style.display = "flex";
-    endButton.style.display = "block"; // mostra o botão apenas no chat
-  }
+  if (screen === "chat") { chat.style.display = "flex"; endButton.style.display = "block"; }
   if (screen === "encerramento") encerramento.style.display = "flex";
+  if (screen === "graficos") graficosSection.style.display = "flex";
 }
 
-
-// Inicia na tela de idioma
 showScreen("idioma");
 history.replaceState({ screen: "idioma" }, "");
+window.onpopstate = (event) => { if(event.state) showScreen(event.state.screen); };
 
+// =============================
+// TROCA DE IDIOMA → LOGIN
+// =============================
+seletorIdiomas.addEventListener("change", () => {
+  const idioma = seletorIdiomas.value;
+  tituloTraducao.textContent = traducoesTitulo[idioma] || traducoesTitulo.pt;
+
+  login.querySelector("h2").textContent = textos[idioma].loginTitulo;
+  login.querySelector(".login__button").textContent = textos[idioma].loginBotao;
+  loginInputs[0].placeholder = textos[idioma].loginPlaceholder;
+  backButton.textContent = textos[idioma].voltar;
+  chatInput.placeholder = textos[idioma].chatPlaceholder;
+
+  showScreen("login");
+  history.pushState({ screen: "login" }, "");
+});
+
+// =============================
 // LOGIN
-const handleLogin = event => {
+// =============================
+loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  user.id = crypto.randomUUID();
-  user.name = loginInput.value;
-  user.color = colors[Math.floor(Math.random() * colors.length)];
-  user.lang = document.getElementById("idiomas_select").value;
+  const nome = loginInputs[0].value.trim();
+  const idioma = seletorIdiomas.value;
 
-  if (!user.name || !user.lang) {
-    alert("Por favor, preencha o nome e selecione o idioma.");
-    return;
-  }
+  if (!nome || !idioma) { alert("Preencha nome e idioma."); return; }
+
+  user.id = crypto.randomUUID();
+  user.name = nome;
+  user.color = colors[Math.floor(Math.random() * colors.length)];
+  user.lang = idioma;
 
   showScreen("chat");
   history.pushState({ screen: "chat" }, "");
 
-  socket = io();  // se conecta automaticamente ao mesmo host
-
-
+  socket = io();
   socket.on("connect", () => {
-    socket.emit("register_user", {
-      id: user.id,
-      name: user.name,
-      color: user.color,
-      lang: user.lang
-    });
+    socket.emit("register_user", { id: user.id, name: user.name, color: user.color, lang: user.lang });
   });
 
   socket.on("chat_message", data => {
     const message = data.userId === user.id
       ? createMessageSelfElement(data.content)
       : createMessageOtherElement(data.content, data.userName, data.userColor);
-
     chatMessages.appendChild(message);
     scrollScreen();
   });
-};
+});
 
-// Envia mensagem
-const sendMessage = event => {
+// =============================
+// ENVIO DE MENSAGEM
+// =============================
+chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (!chatInput.value.trim()) return;
-
-  const message = {
-    userId: user.id,
-    userName: user.name,
-    userColor: user.color,
-    content: chatInput.value
-  };
-
+  if(!chatInput.value.trim()) return;
+  const message = { userId: user.id, userName: user.name, userColor: user.color, content: chatInput.value };
   socket.emit("message", message);
   chatInput.value = "";
-};
+});
 
-// Eventos
-loginForm.addEventListener("submit", handleLogin);
-chatForm.addEventListener("submit", sendMessage);
+// =============================
+// ENCERRAR CHAT
+// =============================
+endButton.addEventListener("click", () => {
+  if(socket) { socket.disconnect(); socket = null; }
+  restartButton.textContent = "Acessar gráficos da aplicação";
+  showScreen("encerramento");
+  document.body.style.overflowY = "auto";
+  history.pushState({ screen: "encerramento" }, "");
+});
 
-// Voltar botão
+// =============================
+// CARDS DE GRÁFICOS
+// =============================
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    const url = card.dataset.grafico.startsWith("/") 
+      ? card.dataset.grafico 
+      : "/" + card.dataset.grafico;
+
+    cards.forEach(c => {
+      c.classList.remove("active");
+      const seta = c.querySelector(".seta");
+      if(seta) seta.textContent = "expand_more";
+    });
+
+    card.classList.add("active");
+    const seta = card.querySelector(".seta");
+    if(seta) seta.textContent = "expand_less";
+
+    display.innerHTML = `<img src="${url}?t=${Date.now()}" alt="Gráfico" style="width:100%; max-width:1100px;">`;
+    display.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// =============================
+// BOTÃO RESTART → GRÁFICOS
+// =============================
+restartButton.addEventListener("click", () => {
+  showScreen("graficos");
+  document.body.style.overflowY = "auto";
+
+  // primeiro gráfico
+  const primeiro = cards[0];
+  const url = primeiro.dataset.grafico.startsWith("/") 
+      ? primeiro.dataset.grafico 
+      : "/" + primeiro.dataset.grafico;
+
+  cards.forEach(c => c.classList.remove("active"));
+  primeiro.classList.add("active");
+
+  display.innerHTML = `<img src="${url}?t=${Date.now()}" alt="Gráfico" style="width:100%; max-width:1100px;">`;
+});
+
+// =============================
+// VOLTAR AO INÍCIO
+// =============================
 backButton.addEventListener("click", () => {
   showScreen("idioma");
+  graficosSection.style.display = "none";
+  document.body.style.overflowY = "auto";
   history.pushState({ screen: "idioma" }, "");
-});
-
-/*endButton.addEventListener("click", () => {
-  // Desconecta o socket, se estiver ativo
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
-
-  // Mostra a tela de encerramento
-  showScreen("encerramento");
-  history.pushState({ screen: "encerramento" }, "");
-});*/
-// ✅ Botão Encerrar Chat (com exibição de gráfico)
-/*endButton.addEventListener("click", async () => {
-  // Desconecta o socket, se estiver ativo
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
-
-  // Busca o gráfico gerado no back-end Flask
-  try {
-    const resp = await fetch('/grafico');
-    const imgSrc = await resp.text();
-
-    // Mostra a tela de encerramento
-    showScreen("encerramento");
-    history.pushState({ screen: "encerramento" }, "");
-
-    // Exibe o gráfico no HTML
-    const encerramentoDiv = document.querySelector(".encerramento");
-    let img = encerramentoDiv.querySelector("img");
-    if (!img) {
-      img = document.createElement("img");
-      encerramentoDiv.appendChild(img);
-    }
-    img.src = imgSrc;
-    img.style.width = "1000px";
-    img.style.maxWidth = "95%";
-    img.style.marginTop = "30px";
-    img.style.borderRadius = "12px";
-    img.style.boxShadow = "0 0 15px rgba(0,0,0,0.25)";
-;
-  } catch (error) {
-    console.error("Erro ao gerar gráfico:", error);
-    showScreen("encerramento");
-  }
-});*/
-
-endButton.addEventListener("click", async () => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
-
-  showScreen("encerramento");
-  history.pushState({ screen: "encerramento" }, "");
-
-  const encerramentoDiv = document.querySelector(".encerramento");
-
-  const rotas = ['/grafico', '/grafico1', '/grafico2', '/grafico3', '/grafico4'];
-
-  for (const rota of rotas) {
-    try {
-      const resp = await fetch(rota);
-      const imgSrc = await resp.text();
-
-      const img = document.createElement("img");
-      img.src = imgSrc;
-      img.style.width = "1000px";
-      img.style.maxWidth = "95%";
-      img.style.marginTop = "30px";
-      img.style.borderRadius = "12px";
-      img.style.boxShadow = "0 0 15px rgba(0,0,0,0.25)";
-      encerramentoDiv.appendChild(img);
-    } catch (error) {
-      console.error(`Erro ao gerar ${rota}:`, error);
-    }
-  }
-});
-
-
-
-restartButton.addEventListener("click", () => {
-  showScreen("idioma");
-  history.pushState({ screen: "idioma" }, "");
-});
-
-
-// Troca idioma de interface
-const select = document.getElementById("idiomas_select");
-const textos = {
-  pt: { loginTitulo: "Login", loginBotao: "Entrar", voltar: "Voltar", loginPlaceholder: "Seu nome", chatPlaceholder: "Digite uma mensagem" },
-  en: { loginTitulo: "Login", loginBotao: "Enter", voltar: "Back", loginPlaceholder: "Your name", chatPlaceholder: "Type a message" },
-  es: { loginTitulo: "Inicio de sesión", loginBotao: "Entrar", voltar: "Volver", loginPlaceholder: "Tu nombre", chatPlaceholder: "Escribe un mensaje" }
-};
-
-select.addEventListener("change", () => {
-  const idioma = select.value;
-  if (textos[idioma]) {
-    login.querySelector("h2").textContent = textos[idioma].loginTitulo;
-    login.querySelector(".login__button").textContent = textos[idioma].loginBotao;
-    login.querySelector(".login__input").placeholder = textos[idioma].loginPlaceholder;
-    backButton.textContent = textos[idioma].voltar;
-    chatInput.placeholder = textos[idioma].chatPlaceholder;
-  }
-  showScreen("login");
-  history.pushState({ screen: "login" }, "");
 });
