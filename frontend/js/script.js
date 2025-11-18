@@ -1,6 +1,6 @@
-// =============================
+
 // ELEMENTOS DOM
-// =============================
+
 const login = document.querySelector(".login");
 const loginForm = login.querySelector(".login__form");
 const loginInputs = login.querySelectorAll(".login__input");
@@ -27,9 +27,9 @@ const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "ho
 const user = { id: "", name: "", color: "", lang: "" };
 let socket;
 
-// =============================
+
 // TEXTOS
-// =============================
+
 const traducoesTitulo = {
   pt: "Tradução automática em tempo real",
   en: "Real-time automatic translation",
@@ -42,9 +42,9 @@ const textos = {
   es: { loginTitulo: "Inicio de sesión", loginBotao: "Entrar", voltar: "Volver", loginPlaceholder: "Tu nombre", chatPlaceholder: "Escribe un mensaje" }
 };
 
-// =============================
+
 // FUNÇÕES AUX
-// =============================
+
 const createMessageSelfElement = content => {
   const div = document.createElement("div");
   div.classList.add("message--self");
@@ -66,9 +66,9 @@ const createMessageOtherElement = (content, sender, senderColor) => {
 
 const scrollScreen = () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 
-// =============================
+
 // CONTROLE DE TELAS
-// =============================
+
 function showScreen(screen) {
   login.style.display = "none";
   chat.style.display = "none";
@@ -88,9 +88,9 @@ showScreen("idioma");
 history.replaceState({ screen: "idioma" }, "");
 window.onpopstate = (event) => { if(event.state) showScreen(event.state.screen); };
 
-// =============================
+
 // TROCA DE IDIOMA → LOGIN
-// =============================
+
 seletorIdiomas.addEventListener("change", () => {
   const idioma = seletorIdiomas.value;
   tituloTraducao.textContent = traducoesTitulo[idioma] || traducoesTitulo.pt;
@@ -105,9 +105,9 @@ seletorIdiomas.addEventListener("change", () => {
   history.pushState({ screen: "login" }, "");
 });
 
-// =============================
+
 // LOGIN
-// =============================
+
 loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const nome = loginInputs[0].value.trim();
@@ -137,9 +137,9 @@ loginForm.addEventListener("submit", (event) => {
   });
 });
 
-// =============================
+
 // ENVIO DE MENSAGEM
-// =============================
+
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if(!chatInput.value.trim()) return;
@@ -148,9 +148,9 @@ chatForm.addEventListener("submit", (event) => {
   chatInput.value = "";
 });
 
-// =============================
+
 // ENCERRAR CHAT
-// =============================
+
 endButton.addEventListener("click", () => {
   if(socket) { socket.disconnect(); socket = null; }
   restartButton.textContent = "Acessar gráficos da aplicação";
@@ -159,9 +159,9 @@ endButton.addEventListener("click", () => {
   history.pushState({ screen: "encerramento" }, "");
 });
 
-// =============================
+
 // CARDS DE GRÁFICOS
-// =============================
+
 cards.forEach(card => {
   card.addEventListener("click", () => {
     const url = card.dataset.grafico.startsWith("/") 
@@ -183,9 +183,9 @@ cards.forEach(card => {
   });
 });
 
-// =============================
+
 // BOTÃO RESTART → GRÁFICOS
-// =============================
+
 restartButton.addEventListener("click", () => {
   showScreen("graficos");
   document.body.style.overflowY = "auto";
@@ -202,9 +202,9 @@ restartButton.addEventListener("click", () => {
   display.innerHTML = `<img src="${url}?t=${Date.now()}" alt="Gráfico" style="width:100%; max-width:1100px;">`;
 });
 
-// =============================
+
 // VOLTAR AO INÍCIO
-// =============================
+
 backButton.addEventListener("click", () => {
   showScreen("idioma");
   graficosSection.style.display = "none";
