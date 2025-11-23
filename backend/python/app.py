@@ -9,30 +9,30 @@ import random
 import time
 from functools import wraps  # necessário para evitar conflito de endpoint
 
-
+# ================================
 # CAMINHOS DO PROJETO
-
+# ================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../frontend"))
 
-
+# ================================
 # CONFIGURAÇÃO FLASK + SOCKETIO
-
+# ================================
 app = Flask(__name__,
             static_folder=os.path.join(FRONTEND_DIR),
             static_url_path="/")
 socketio = SocketIO(app, cors_allowed_origins="*")
 translator = Translator()
 
-
+# ================================
 # DADOS DO CHAT
-
+# ================================
 users = {}
 tempos_traducao = []  # guarda tempos de resposta simulados
 
-
+# ================================
 # ROTAS BÁSICAS
-
+# ================================
 @app.route('/')
 def home():
     return send_from_directory(FRONTEND_DIR, 'index.html')
@@ -41,9 +41,9 @@ def home():
 def serve_static(filename):
     return send_from_directory(FRONTEND_DIR, filename)
 
-
+# ================================
 # EVENTOS DO CHAT
-
+# ================================
 @socketio.on('connect')
 def handle_connect():
     print("Novo cliente conectado!")
@@ -82,7 +82,7 @@ def handle_message(data):
             translated_text = translator.translate(original_text, dest=target_lang).text
             fim = time.time()
 
-            
+            # guarda tempo de tradução
             tempos_traducao.append(fim - inicio)
             if len(tempos_traducao) > 100:
                 tempos_traducao.pop(0)
@@ -96,9 +96,9 @@ def handle_message(data):
         except Exception as e:
             print("Erro na tradução:", e)
 
-
+# ================================
 # DECORADOR PARA GERAR GRÁFICOS
-
+# ================================
 def gerar_grafico(func):
     """Decorador para gerar PNG a partir do matplotlib"""
     @wraps(func)
@@ -111,9 +111,9 @@ def gerar_grafico(func):
         return Response(buf.getvalue(), mimetype='image/png')
     return wrapper
 
-
+# ================================
 # ROTAS DE GRÁFICOS
-
+# ================================
 @app.route('/grafico')
 @gerar_grafico
 def grafico_latencia():
@@ -194,8 +194,8 @@ def grafico_tempo_resposta():
     ax.legend()
     return fig
 
-
+# ================================
 # EXECUÇÃO
-
+# ================================
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)    
