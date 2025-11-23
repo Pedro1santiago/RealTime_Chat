@@ -13,14 +13,14 @@ body {
 }
  
 .container {
-    width: 100%;
-    height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden; /* impede scroll indesejado */
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+  
 }
  
 /* Login */
@@ -231,4 +231,171 @@ body {
  
 .seletor_idiomas.dropdown-open {
     height: 220px;
+}
+.titulo {
+  text-align: center;
+  color: white;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap; /* impede quebra de linha */
+  display: inline-block;
+}
+
+/* Botão Encerrar */
+.end-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 6px 12px;
+  background-color: #a22;
+  color: #f2f2f2;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.2s ease;
+}
+
+.end-button:hover {
+  background-color: #c33;
+}
+
+.encerramento{
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 25px;
+  background-color: #212121;
+  color: #f2f2f2;
+  padding: 40px 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.encerramento__titulo {
+  font-size: 1.6em;
+  font-weight: 700;
+  color: #fff;
+}
+
+.encerramento__img {
+  width: 220px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: contain;
+  box-shadow: 0 0 15px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease;
+}
+
+.encerramento__img:hover {
+  transform: scale(1.05);
+}
+
+.restart-button {
+  border: none;
+  padding: 12px 22px;
+  border-radius: 6px;
+  background-color: #00bfff;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.restart-button:hover {
+  background-color: #009edb;
+  transform: translateY(-2px);
+}
+
+.graficos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  max-height: 100vh; /* limite para a tela */
+  overflow-y: auto;  /* ativa scroll vertical se necessário */
+  padding: 60px 20px;
+  color: #f2f2f2;
+  transition: all 0.5s ease;
+}
+
+.graficos h2 {
+  color: #fff;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 40px;
+  transition: transform 0.5s ease;
+}
+
+/* Quando um gráfico é exibido, sobe tudo (título + cards) */
+.graficos.active h2,
+.graficos.active .cards-container {
+  transform: translateY(-60px);
+}
+
+.cards-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 30px;
+  transition: transform 0.5s ease;
+}
+
+.grafico-card {
+  background-color: #1a1a1a;
+  color: white;
+  width: 300px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.grafico-card:hover {
+  background-color: #444; /* cinza no hover */
+  transform: translateY(-5px);
+}
+
+.grafico-card.active {
+  background-color: #555;
+  color: #fff;
+}
+
+/* Gráfico branco ocupando toda a largura */
+.grafico {
+  background-color: white;
+  width: 100%;
+  max-width: 1100px;
+  min-height: 600px;  /* garantir altura mínima */
+  border-radius: 20px;
+  padding: 25px;
+  margin-top: 40px;
+  display: flex;      /* antes era none */
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  overflow: auto;
+}
+
+.grafico.visible {
+  display: block;
+}
+
+/* Esconde seções */
+.hidden {
+  display: none;
 }
